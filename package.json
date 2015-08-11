@@ -1,0 +1,13 @@
+{
+  "name": "Load-test",
+  "dependencies": {
+    "jquery": "*",
+    "commander":"*",
+    "built.io-browserify": "2.0.*",
+    "path": "^0.4.9",
+    "ramda": "*",
+    "rest": "*",
+    "underscore": "^1.7.0",
+    "when": "*"
+  }
+}
