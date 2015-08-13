@@ -1,6 +1,13 @@
 var when          = require('when');
 var sequence      = require('when/sequence');
-var AppMasterKey  = require('./sdk');
+var program       = require('commander');
+var AppMasterKey  = require('./sdk_localhost');
+
+program
+  .version('0.0.2')
+  .usage('[options]')
+  .option('-u, --username <n>', 'Specify your chirp username')
+  .parse(process.argv);
 
 AppMasterKey.Class('built_io_application_user').Query()
 .matches('username','^dummyuser')
@@ -9,12 +16,17 @@ AppMasterKey.Class('built_io_application_user').Query()
 	var uidArr = dummyUsers.map(function(dummyUser){
 		return dummyUser.get('uid');
 	});
-	AppMasterKey.Class('built_io_application_user') //
-	.Object('blt53e2d3f6874cdf6b')
-	.pushValue('follows', uidArr)
-	.timeless()
-	.save()
-	.then(function(){
-		console.log("followed");
+
+	AppMasterKey.Class('built_io_application_user').Query()
+	.where('username',program.username)
+	.exec()
+	.then(function(user){
+		user[0]
+		.pushValue('follows', uidArr)
+		.timeless()
+		.save()
+		.then(function(){
+			console.log("followed");
+		})
 	})
 })

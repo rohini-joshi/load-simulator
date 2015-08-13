@@ -1,33 +1,38 @@
 var fs 					 = require('fs');
-var registerUser = require('./register')
-
-//To take the number of users from command line
-var numUsers 		 = process.argv[2] || 1;
-
-//To take a random name to append to the users while creating the users
-var initialName  = process.argv[3] || 'raw';
-var count        = process.argv[4] || 2;
+var program      = require('commander');
+var registerUser = require('./register');
 
 var Users 			 = [];
 
+program
+  .version('0.0.2')
+  .usage('[options]')
+  .option('-u, --users <n>', 'Specify no of users to be generated',parseInt)
+  .option('-n, --name <n>', 'specify name for dummy user')
+  .option('-a, --actors <n>', 'specify no of users who can comment and like i.e set flag canAct to 1',parseInt)
+  .parse(process.argv);
+
+program.users  = typeof program.users === 'undefined' ? 1 : program.users;
+program.name   = typeof program.name === 'function' ? 'raw' : program.name;
+
 //Generate Dummy Users
-for(i=0; i< numUsers; i++){
+for(i=0; i< program.users; i++){
 	var user = {
-		"email"           : "dummyuser"+ initialName + i + "@testraweng.com",
+		"email"           : "dummyuser"+ program.name + i + "@testraweng.com",
 		"password"        : "passdummy",
 		"password_confirm": "passdummy",
 		"extra_fields"    :{
-			"username": "dummyuser"+ initialName + i
+			"username": "dummyuser"+ program.name + i
 		}
 	};
-	if(i<count){
+	if(i<program.actors){
 		user['canAct'] = 1;
 	}
 	Users.push(user)
 }
 
 //Write the user objects into the json file
-if(i == numUsers){
+if(i == program.users){
 	fs.writeFileSync('users.json', JSON.stringify(Users,'\t',2))
 	registerUser(Users)
 }
