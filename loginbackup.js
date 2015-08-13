@@ -3,18 +3,18 @@ var cluster      = require('cluster');
 var when         = require('when');
 var sequence     = require('when/sequence');
 var program      = require('commander');
-var AppMasterKey = require('./sdk_localhost');
-
+var AppMasterKey = require('./sdk');
 var Users        = require('./users.json');
+
 var numUser      = Users.length;
 var workers      = [];
 
 program
   .version('0.0.2')
   .usage('[options]')
-  .option('-c, --canChirp <n>', 'Specify no of users who can post chirp',parseInt)
-  .option('-r, --repeat <n>', 'specify number of times user should chirp',parseInt)
-  .parse(process.argv);
+  .option('-c, --canChirp <n>', 'Specify the number of users hwo can chirp')
+  .option('-r, --repeat <n>', 'Specify the number of times a user should chirp')
+  .parse(process.argv)
 
 program.canChirp = typeof program.canChirp === 'undefined' ? 1 : program.canChirp;
 program.repeat   = typeof program.repeat === 'undefined' ? 1 : program.repeat;
@@ -23,7 +23,7 @@ program.repeat   = typeof program.repeat === 'undefined' ? 1 : program.repeat;
 function loginUser(user){
   return AppMasterKey.User().login(user.email,user.password)
   .then(function(data){
-    AppMasterKey.User.getPresence()
+     AppMasterKey.User.getPresence()
     .then(function(presence){
       presence
       .setPublic(true)
@@ -55,7 +55,7 @@ function likeChirp(chirp,timeInt,userUid){
         chirp_uid: chirp.get('uid')
       })
       .then(function(tweet){
-        console.log("chirp after unlike",userUid);
+        console.log("chirp after unlike");
       })
     }else{
       AppMasterKey.Extension
@@ -63,13 +63,13 @@ function likeChirp(chirp,timeInt,userUid){
         chirp_uid: chirp.get('uid')
       })
       .then(function(tweet){
-        console.log("chirp after like",userUid);
+        console.log("chirp after like");
       })
     }
   },timeInt);
 }
 
-function comment(chirp,timeInt,userUid){
+function comment(chirp,timeInt){
   setTimeout(function() { //to comment on chirp after a random time interval
     console.log("in comment");
     AppMasterKey.Extension.execute('addComment',{
@@ -77,7 +77,7 @@ function comment(chirp,timeInt,userUid){
       chirp_uid: chirp.get('uid')
     })
     .then(function(){
-      console.log("commented",userUid);
+      console.log("commented");
     })
   },timeInt + 10000);
 }
@@ -92,7 +92,7 @@ if (cluster.isMaster) {
   });
 } else{
     var userId     = cluster.worker.id - 1;
-    var chirpCount = program.canChirp;
+    var chirpCount = program.canChirp; 
     var repeat     = program.repeat;
 
     //Create dummy chirps

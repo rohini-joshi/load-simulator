@@ -1,6 +1,6 @@
 var when          = require('when');
 var sequence      = require('when/sequence');
-var AppMasterKey  = require('./sdk');
+var AppMasterKey  = require('./sdk_localhost');
 
 //Register the Users
 module.exports = registerUser = function (Users){
