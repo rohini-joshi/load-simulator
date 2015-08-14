@@ -14,10 +14,18 @@ program
   .usage('[options]')
   .option('-c, --canChirp <n>', 'Specify no of users who can post chirp',parseInt)
   .option('-r, --repeat <n>', 'specify number of times user should chirp',parseInt)
+  .option('-s, --minChirp <n>', 'min delay in millisec for chirp creation',parseInt)
+  .option('-l, --maxChirp <n>', 'max delay in millisec for chirp creation',parseInt)
+  .option('-S, --minLikeCom <n>', 'min delay in millisec for chirp like and comment',parseInt)
+  .option('-L, --maxLikeCom <n>', 'max delay in millisec for chirp like and comment',parseInt)
   .parse(process.argv);
 
-program.canChirp = typeof program.canChirp === 'undefined' ? 1 : program.canChirp;
-program.repeat   = typeof program.repeat === 'undefined' ? 1 : program.repeat;
+program.canChirp   = typeof program.canChirp === 'undefined' ? 1 : program.canChirp;
+program.repeat     = typeof program.repeat === 'undefined' ? 1 : program.repeat;
+program.minChirp   = typeof program.minChirp === 'undefined' ? 1000 : program.minChirp;
+program.maxChirp   = typeof program.maxChirp === 'undefined' ? 9000 : program.maxChirp;
+program.minLikeCom = typeof program.minLikeCom === 'undefined' ? 1000 : program.minLikeCom;
+program.maxLikeCom = typeof program.maxLikeCom === 'undefined' ? 9000 : program.maxLikeCom;
 
 // Get the user logged in and make his/her presence public
 function loginUser(user){
@@ -35,7 +43,9 @@ function loginUser(user){
 }
 
 function createChirp(timeInt){
+  console.log("in chirp");
   setTimeout(function() { //to send chirps from dummy user after a random time interval
+  console.log("in chirp settim");
     var requestBody = {
       content: "dummy chirp",
       images: []
@@ -71,7 +81,7 @@ function likeChirp(chirp,timeInt,userUid){
 
 function comment(chirp,timeInt,userUid){
   setTimeout(function() { //to comment on chirp after a random time interval
-    console.log("in comment");
+    console.log("in comment", userUid, timeInt);
     AppMasterKey.Extension.execute('addComment',{
       content: "dummy comment",
       chirp_uid: chirp.get('uid')
@@ -79,7 +89,7 @@ function comment(chirp,timeInt,userUid){
     .then(function(){
       console.log("commented",userUid);
     })
-  },timeInt + 10000);
+  },timeInt);
 }
 
 if (cluster.isMaster) {
@@ -95,6 +105,7 @@ if (cluster.isMaster) {
     var chirpCount = program.canChirp;
     var repeat     = program.repeat;
 
+    console.log("time ",program.maxLikeCom,program.minLikeCom,program.minChirp,program.maxChirp,program.repeat,program.canChirp);
     //Create dummy chirps
     loginUser(Users[userId])
     .then(function(user){
@@ -103,13 +114,15 @@ if (cluster.isMaster) {
         console.log("on chirp create",userId);
         if(Users[userId].canAct === 1){
           console.log("after create chirp can act");
-          sequence([likeChirp,comment],chirp,Math.floor(Math.random() * (9000 - 1000 + 1) + 1000),user.get('uid'));
+          sequence([likeChirp,comment],chirp,Math.floor(Math.random() * (program.maxLikeCom - program.minLikeCom + 1) + program.minLikeCom),user.get('uid'));
         }
       });
       
       if(cluster.worker.id <= chirpCount){
+          console.log("in repeat ",repeat);
         for(var i=0;i<repeat;i++){
-          createChirp(Math.floor(Math.random() * (9000 - 1000 + 1) + 1000));
+          console.log("in repeat after ",repeat);
+          createChirp(Math.floor(Math.random() * (program.maxChirp - program.minChirp + 1) + program.minChirp));
         }
       }
 		})

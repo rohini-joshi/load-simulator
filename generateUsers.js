@@ -9,7 +9,7 @@ program
   .usage('[options]')
   .option('-u, --users <n>', 'Specify number of users to generate', parseInt)
   .option('-n, --name <n>', 'Speicfy a string to append to the username')
-  .option('-a, --actors <n>', 'Specify the number of users who can comment/like', parseInt)
+  .option('-a, --actors <n>', 'Specify no of users who can comment and like i.e set flag canAct to 1', parseInt)
   .parse(process.argv);
 
 // Set default values if not entered through terminal

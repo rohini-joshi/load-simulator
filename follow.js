@@ -16,7 +16,7 @@ AppMasterKey.Class('built_io_application_user').Query()
 	var uidArr = dummyUsers.map(function(dummyUser){
 		return dummyUser.get('uid');
 	});
-	
+
 	AppMasterKey.Class('built_io_application_user').Query()
 	.where('username',program.username)
 	.exec()
@@ -28,5 +28,5 @@ AppMasterKey.Class('built_io_application_user').Query()
 		.then(function(){
 			console.log("followed");
 		})
-	});
+	})
 })
