@@ -1,7 +1,10 @@
-var when          = require('when');
-var fs            = require('fs');
-var sequence      = require('when/sequence');
-var AppMasterKey  = require('./sdk_localhost');
+var when         = require('when');
+var fs           = require('fs');
+var sequence     = require('when/sequence');
+var masterKey    = 'blt73275122067fbf70';
+var AppMasterKey = require('./sdk_localhost')
+    AppMasterKey = AppMasterKey
+									 .setMasterKey(masterKey);
 
 function deleteUsers(){
 	AppMasterKey.Class('built_io_application_user')
@@ -9,7 +12,7 @@ function deleteUsers(){
 	.matches('username','^dummyuser')
 	.exec()
 	.then(function(dummyUsers){
-		dummyUsers.map(function(user){
+		return dummyUsers.map(function(user){
 			AppMasterKey.Class('tweet').Query()
 			.where('app_user_object_uid',user.get('uid'))
 			.exec()
@@ -42,12 +45,12 @@ function deleteUsers(){
 					return sequence(arr);
 			  })
 			})
-    .then(function(){ //Delete the users
-	    console.log("successfully deleted");
-			user.delete()
-		})
+	    .then(function(){ //Delete the users
+				console.log("successfully deleted");
+				user.delete()
+			})
+ 	  })
   })
-})
 }
 
-deleteUsers()
+deleteUsers();

@@ -1,45 +1,43 @@
 [
   {
-    "email": "dummyuserlocal0@testraweng.com",
+    "email": "dummyuserraw0@testraweng.com",
     "password": "passdummy",
     "password_confirm": "passdummy",
     "extra_fields": {
-      "username": "dummyuserlocal0"
+      "username": "dummyuserraw0"
     },
     "canAct": 1
   },
   {
-    "email": "dummyuserlocal1@testraweng.com",
+    "email": "dummyuserraw1@testraweng.com",
     "password": "passdummy",
     "password_confirm": "passdummy",
     "extra_fields": {
-      "username": "dummyuserlocal1"
-    },
-    "canAct": 1
-  },
-  {
-    "email": "dummyuserlocal2@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyuserlocal2"
-    },
-    "canAct": 1
-  },
-  {
-    "email": "dummyuserlocal3@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyuserlocal3"
+      "username": "dummyuserraw1"
     }
   },
   {
-    "email": "dummyuserlocal4@testraweng.com",
+    "email": "dummyuserraw2@testraweng.com",
     "password": "passdummy",
     "password_confirm": "passdummy",
     "extra_fields": {
-      "username": "dummyuserlocal4"
+      "username": "dummyuserraw2"
+    }
+  },
+  {
+    "email": "dummyuserraw3@testraweng.com",
+    "password": "passdummy",
+    "password_confirm": "passdummy",
+    "extra_fields": {
+      "username": "dummyuserraw3"
+    }
+  },
+  {
+    "email": "dummyuserraw4@testraweng.com",
+    "password": "passdummy",
+    "password_confirm": "passdummy",
+    "extra_fields": {
+      "username": "dummyuserraw4"
     }
   }
 ]

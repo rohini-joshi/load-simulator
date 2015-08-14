@@ -14,4 +14,4 @@ var App           = BuiltSDK.App(API_KEY)
 .persistSessionWith(BuiltSDK.Session.LOCAL_STORAGE)
 .enableRealtime();
 
-module.exports =  AppMasterKey  = App.setMasterKey(masterKey);
+module.exports =  AppMasterKey  = App;

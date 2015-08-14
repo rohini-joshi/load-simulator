@@ -1,3 +1,4 @@
+var when         = require('when');
 var fs 					 = require('fs');
 var program      = require('commander');
 var registerUser = require('./register');
@@ -14,6 +15,7 @@ program
 
 program.users  = typeof program.users === 'undefined' ? 1 : program.users;
 program.name   = typeof program.name === 'function' ? 'raw' : program.name;
+program.actors  = typeof program.actors === 'undefined' ? 1 : program.actors;
 
 //Generate Dummy Users
 for(i=0; i< program.users; i++){
@@ -34,5 +36,10 @@ for(i=0; i< program.users; i++){
 //Write the user objects into the json file
 if(i == program.users){
 	fs.writeFileSync('users.json', JSON.stringify(Users,'\t',2))
-	registerUser(Users)
+	var array = registerUser(Users);
+	when.all(array).then(function(){
+		console.log("all users registerd");
+		process.exit();
+	})
+	
 }
