@@ -1,44 +1,19 @@
 [
   {
-    "email": "dummyusernikita0@testraweng.com",
+    "email": "dummyuserraw0@testraweng.com",
     "password": "passdummy",
     "password_confirm": "passdummy",
     "extra_fields": {
-      "username": "dummyusernikita0"
+      "username": "dummyuserraw0"
     },
     "canAct": 1
   },
   {
-    "email": "dummyusernikita1@testraweng.com",
+    "email": "dummyuserraw1@testraweng.com",
     "password": "passdummy",
     "password_confirm": "passdummy",
     "extra_fields": {
-      "username": "dummyusernikita1"
-    },
-    "canAct": 1
-  },
-  {
-    "email": "dummyusernikita2@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita2"
-    }
-  },
-  {
-    "email": "dummyusernikita3@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita3"
-    }
-  },
-  {
-    "email": "dummyusernikita4@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita4"
+      "username": "dummyuserraw1"
     }
   }
 ]
