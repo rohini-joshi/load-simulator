@@ -14,8 +14,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi1"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi2@testraweng.com",
@@ -23,8 +22,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi2"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi3@testraweng.com",
@@ -32,8 +30,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi3"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi4@testraweng.com",
@@ -41,8 +38,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi4"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi5@testraweng.com",
@@ -50,8 +46,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi5"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi6@testraweng.com",
@@ -59,8 +54,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi6"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi7@testraweng.com",
@@ -68,8 +62,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi7"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi8@testraweng.com",
@@ -77,8 +70,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi8"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi9@testraweng.com",
@@ -86,8 +78,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi9"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi10@testraweng.com",
@@ -95,8 +86,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi10"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi11@testraweng.com",
@@ -104,8 +94,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi11"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi12@testraweng.com",
@@ -113,8 +102,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi12"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi13@testraweng.com",
@@ -122,8 +110,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi13"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi14@testraweng.com",
@@ -131,8 +118,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi14"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi15@testraweng.com",
@@ -140,8 +126,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi15"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi16@testraweng.com",
@@ -149,8 +134,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi16"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi17@testraweng.com",
@@ -158,8 +142,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi17"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi18@testraweng.com",
@@ -167,8 +150,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi18"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyuserrohi19@testraweng.com",
@@ -176,7 +158,6 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserrohi19"
-    },
-    "canAct": 1
+    }
   }
 ]

@@ -25,11 +25,12 @@ program.login      = typeof program.login === 'undefined' ? 1 : program.login;
 program.repeat     = typeof program.repeat === 'undefined' ? 1 : program.repeat;
 program.minChirp   = typeof program.minChirp === 'undefined' ? 1000 : program.minChirp;
 program.maxChirp   = typeof program.maxChirp === 'undefined' ? 9000 : program.maxChirp;
-program.minLikeCom = typeof program.minLikeCom === 'undefined' ? 10000 : program.minLikeCom;
-program.maxLikeCom = typeof program.maxLikeCom === 'undefined' ? 90000: program.maxLikeCom;
+program.minLikeCom = typeof program.minLikeCom === 'undefined' ? 1000 : program.minLikeCom;
+program.maxLikeCom = typeof program.maxLikeCom === 'undefined' ? 9000: program.maxLikeCom;
 
 // Get the user logged in and make his/her presence public
 function loginUser(user){
+  console.log(App.options)
   var loggedinUser
   return App
   .User().login(user.email,user.password)
@@ -219,6 +220,7 @@ if (cluster.isMaster) {
       var App = require('./sdk_localhost')
                 .enableRealtime();
       console.log("in if of can login");
+      App.options.userJSON = "pandu"
       loginUser(Users[userId])
       .then(function(user){
         App.Class('tweet').Object

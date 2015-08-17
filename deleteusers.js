@@ -47,7 +47,7 @@ function deleteUsers(){
 			})
 	    .then(function(){ //Delete the users
 				console.log("successfully deleted");
-				user.delete()
+				//user.delete()
 			})
  	  })
   })
