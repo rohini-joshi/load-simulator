@@ -3,7 +3,7 @@
   "dependencies": {
     "jquery": "*",
     "commander":"*",
-    "built.io-browserify": "2.0.*",
+    "built.io-browserify": "*",
     "path": "^0.4.9",
     "ramda": "*",
     "rest": "*",

@@ -36,6 +36,7 @@ function loginUser(user, App){
   .then(function(loggeduser){
       loggedinUser = loggeduser
       return App.User.getPresence()    
+      // return loggeduser.getPresence()
     })
     .then(function(presence){
       return presence
@@ -43,20 +44,12 @@ function loginUser(user, App){
         .save() 
     })
     .then(function(){
-      console.log("fetching channels");
-      return fetchChannels(loggedinUser, App);
-    })
-    .then(function(){
-      console.log("fetching chirpss");
-      return fetchChirps(loggedinUser, App);
-    })
-    .then(function(){
-      console.log("fetching users");
-      return fetchUsers(App);
-    })
-    .then(function(){
-      console.log("count ");
-      return getChirpsCount(loggedinUser, App);
+      return when.all([
+        fetchChannels(loggedinUser, App),
+        fetchChirps(loggedinUser, App),
+        fetchUsers(App),
+        getChirpsCount(loggedinUser, App)
+      ]);
     })
     .then(function(){
       return loggedinUser;
@@ -117,6 +110,10 @@ function getChirpsCount(user, App){
   return App.Class('tweet').Query()
   .or([mentionsQuery, myChirpsQuery])
   .count()
+  .exec()
+  .then(function(){
+    console.log("counts fetched");
+  })
 }
 
 function fetchChannels(user, App){
@@ -130,12 +127,15 @@ function fetchChannels(user, App){
   var query1 = query.where('members',user.get('uid'));         //To fetch public and private channels
   var query2 = query.select('type', queryChanneltype, 'uid');  //To fetch all announcements
 
-  var Channels = App.Class('channel')
+  return App.Class('channel')
   .Query()
   .include(['type'])
   .includeOwner()
   .or([query1,query2])
   .exec()
+  .then(function(){
+    console.log("channels fetched");
+  })
 }
 
 function fetchChirps(user, App){
@@ -177,7 +177,10 @@ function fetchChirps(user, App){
       .descending('updated_at')
       .or([mentionsQuery, followsQuery, announcement])
 
-    return wallChirps.exec();
+    return wallChirps.exec()
+    .then(function(){
+      console.log("chirps fetched");
+    });
 }
 
 function fetchUsers(App){
@@ -187,6 +190,9 @@ function fetchUsers(App){
   .only(['username','uid','email','avatar.url','avatar_random','_presence','follows','auth_data'])
   .limit(500)
   .exec()
+  .then(function(){
+    console.log("users fetched");
+  })
 }
 
 function comment(chirp,timeInt,user, App){
