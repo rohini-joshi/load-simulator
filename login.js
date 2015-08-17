@@ -26,41 +26,66 @@ program.repeat     = typeof program.repeat === 'undefined' ? 1 : program.repeat;
 program.minChirp   = typeof program.minChirp === 'undefined' ? 1000 : program.minChirp;
 program.maxChirp   = typeof program.maxChirp === 'undefined' ? 9000 : program.maxChirp;
 program.minLikeCom = typeof program.minLikeCom === 'undefined' ? 1000 : program.minLikeCom;
-program.maxLikeCom = typeof program.maxLikeCom === 'undefined' ? 9000 : program.maxLikeCom;
+program.maxLikeCom = typeof program.maxLikeCom === 'undefined' ? 9000: program.maxLikeCom;
 
 // Get the user logged in and make his/her presence public
-function loginUser(user){
-  return AppMasterKey
+function loginUser(user, App){
+  var loggedinUser
+  return App
   .User().login(user.email,user.password)
-  .then(function(data){
-    AppMasterKey.User.getPresence()
+  .then(function(loggeduser){
+      loggedinUser = loggeduser
+      return App.User.getPresence()    
+    })
     .then(function(presence){
-      presence
-      .setPublic(true)
-      .save();
-      return data;
-    });
-    return data;
-  })
+      return presence
+        .setPublic(true)
+        .save() 
+    })
+    .then(function(){
+      console.log("fetching channels");
+      return fetchChannels(loggedinUser, App);
+    })
+    .then(function(){
+      console.log("fetching chirpss");
+      return fetchChirps(loggedinUser, App);
+    })
+    .then(function(){
+      console.log("fetching users");
+      return fetchUsers(App);
+    })
+    .then(function(){
+      console.log("count ");
+      return getChirpsCount(loggedinUser, App);
+    })
+    .then(function(){
+      return loggedinUser;
+    })
+    .catch(function(err){
+      console.log("err in fetching", err);
+      cluster.worker.kill()
+    })
+    // return loggedinUser;
+  
 }
 
-function createChirp(timeInt,user){
+function createChirp(timeInt,user, App){
   setTimeout(function() { //to send chirps from dummy user after a random time interval
     var requestBody = {
       content: "dummy chirp " + user.get('username'),
       images: []
     }
-    AppMasterKey.Extension.execute('createTweet',requestBody)
+    App.Extension.execute('createTweet',requestBody)
     .then(function(chirp){
       console.log("chirp created");
     })
   },timeInt);
 }
 
-function likeChirp(chirp,timeInt,user){
+function likeChirp(chirp,timeInt,user, App){
   setTimeout(function() { //to like chirps after a random time interval
     if(chirp.get('upvotes') && chirp.get('upvotes').indexOf(userUid)>=0){
-      AppMasterKey.Extension
+      App.Extension
       .execute('unlike', {
         chirp_uid: chirp.get('uid')
       })
@@ -68,7 +93,7 @@ function likeChirp(chirp,timeInt,user){
         console.log("chirp after unlike",user.get('uid'));
       })
     }else{
-      AppMasterKey.Extension
+      App.Extension
       .execute('like', {
         chirp_uid: chirp.get('uid')
       })
@@ -79,9 +104,94 @@ function likeChirp(chirp,timeInt,user){
   },timeInt);
 }
 
-function comment(chirp,timeInt,user){
+//realtime scenario: fetch chirps and channels for user after login
+function getChirpsCount(user, App){
+  var mentionsQuery = App.Class('tweet').Query()
+  .containedIn('mentions', user.get('uid'))
+  .doesNotExists('post_to');
+
+  var myChirpsQuery = App.Class('tweet').Query()
+  .where('app_user_object_uid', user.get('uid'))
+  .doesNotExists('post_to');
+
+  return App.Class('tweet').Query()
+  .or([mentionsQuery, myChirpsQuery])
+  .count()
+}
+
+function fetchChannels(user, App){
+  var self   = this;
+  var queryChanneltype = App
+  .Class('channel_type')
+  .Query()
+  .where('type', 'announcement');
+
+  var query  = App.Class('channel').Query();
+  var query1 = query.where('members',user.get('uid'));         //To fetch public and private channels
+  var query2 = query.select('type', queryChanneltype, 'uid');  //To fetch all announcements
+
+  var Channels = App.Class('channel')
+  .Query()
+  .include(['type'])
+  .includeOwner()
+  .or([query1,query2])
+  .exec()
+}
+
+function fetchChirps(user, App){
+  var mentionsQuery = App.Class('tweet').Query()
+      .doesNotExists('post_to')
+      .containedIn('mentions', user.get('uid'));
+
+    var followsQuery = App.Class('tweet').Query()
+      .doesNotExists('post_to')
+      .containedIn('app_user_object_uid',user.get('uid'));
+
+    // to add announcement chirps to wall.
+    var queryChanneltype = App
+      .Class('channel_type')
+      .Query()
+      .where('type', 'announcement');
+
+    var queryChannel = App
+        .Class('channel')
+        .Query()
+        .includeOwner()
+        .select('type', queryChanneltype, 'uid');
+
+    var announcement = App
+      .Class('tweet')
+      .Query()
+      .includeOwner()
+      .include(['comment_preview', 'post_to','poll'])
+      .select('post_to', queryChannel, 'uid')
+      .limit(12)
+      .lessThan('updated_at',new Date())
+      .descending('updated_at');
+
+    var wallChirps = App.Class('tweet').Query()
+      .includeOwner()
+      .include(['comment_preview','post_to','poll'])
+      .limit(12)
+      .lessThan('updated_at', new Date())
+      .descending('updated_at')
+      .or([mentionsQuery, followsQuery, announcement])
+
+    return wallChirps.exec();
+}
+
+function fetchUsers(App){
+  return App
+  .Class('built_io_application_user')
+  .Query()
+  .only(['username','uid','email','avatar.url','avatar_random','_presence','follows','auth_data'])
+  .limit(500)
+  .exec()
+}
+
+function comment(chirp,timeInt,user, App){
   setTimeout(function() { //to comment on chirp after a random time interval
-    AppMasterKey.Extension.execute('addComment',{
+    App.Extension.execute('addComment',{
       content: "dummy comment "+user.get('username'),
       chirp_uid: chirp.get('uid')
     })
@@ -93,7 +203,8 @@ function comment(chirp,timeInt,user){
 
 if (cluster.isMaster) {
   // Fork workers.
-  for (var i = 0; i < numUser; i++) {
+  var canLogin     = program.login;
+  for (var i = 0; i < canLogin; i++) {
     cluster.fork();
   }
   cluster.on('exit', function(worker, code, signal) {
@@ -101,28 +212,28 @@ if (cluster.isMaster) {
   });
 } else{
     var userId       = cluster.worker.id - 1;
-    var chirpCount   = program.canChirp;
-    var canLogin     = program.login;
+    var chirpCount   = program.canChirp;    
     var repeat       = program.repeat;
     //Create dummy chirps
-    if(cluster.worker.id <= canLogin){
-      var AppMasterKey = require('./sdk_localhost');
+    // if(cluster.worker.id <= canLogin){
+      var App = require('./sdk_localhost')
+                .enableRealtime();
       console.log("in if of can login");
-      loginUser(Users[userId])
+      loginUser(Users[userId], App)
       .then(function(user){
-        AppMasterKey.Class('tweet').Object
+        App.Class('tweet').Object
         .on('create',function(chirp){
           if(Users[userId].canAct === 1){
-           /* sequence([likeChirp,comment],chirp,Math.floor(Math.random() * (program.maxLikeCom - program.minLikeCom + 1) + program.minLikeCom),user);*/
+            sequence([comment],chirp,Math.floor(Math.random() * (program.maxLikeCom - program.minLikeCom + 1) + program.minLikeCom),user, App);
           }
         });
         
         if(cluster.worker.id <= chirpCount){
           for(var i=0;i<repeat;i++){
             console.log("in repeat after ",repeat);
-            createChirp(Math.floor(Math.random() * (program.maxChirp - program.minChirp + 1) + program.minChirp),user);
+            createChirp(Math.floor(Math.random() * (program.maxChirp - program.minChirp + 1) + program.minChirp),user, App);
           }
         }
   		})
-    }
+    // }
 	}

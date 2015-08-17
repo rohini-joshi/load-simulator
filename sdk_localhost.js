@@ -12,6 +12,5 @@ var App           = BuiltSDK.App(API_KEY)
 .setProtocol('https')
 .setRtHost(RT_API_URL)
 .persistSessionWith(BuiltSDK.Session.LOCAL_STORAGE)
-.enableRealtime();
 
-module.exports =  AppMasterKey  = App;
+module.exports =  App  = App;

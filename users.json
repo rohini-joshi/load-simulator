@@ -23,8 +23,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyusernikita2"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyusernikita3@testraweng.com",
@@ -32,8 +31,7 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyusernikita3"
-    },
-    "canAct": 1
+    }
   },
   {
     "email": "dummyusernikita4@testraweng.com",
@@ -41,127 +39,6 @@
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyusernikita4"
-    },
-    "canAct": 1
-  },
-  {
-    "email": "dummyusernikita5@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita5"
-    }
-  },
-  {
-    "email": "dummyusernikita6@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita6"
-    }
-  },
-  {
-    "email": "dummyusernikita7@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita7"
-    }
-  },
-  {
-    "email": "dummyusernikita8@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita8"
-    }
-  },
-  {
-    "email": "dummyusernikita9@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita9"
-    }
-  },
-  {
-    "email": "dummyusernikita10@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita10"
-    }
-  },
-  {
-    "email": "dummyusernikita11@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita11"
-    }
-  },
-  {
-    "email": "dummyusernikita12@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita12"
-    }
-  },
-  {
-    "email": "dummyusernikita13@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita13"
-    }
-  },
-  {
-    "email": "dummyusernikita14@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita14"
-    }
-  },
-  {
-    "email": "dummyusernikita15@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita15"
-    }
-  },
-  {
-    "email": "dummyusernikita16@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita16"
-    }
-  },
-  {
-    "email": "dummyusernikita17@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita17"
-    }
-  },
-  {
-    "email": "dummyusernikita18@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita18"
-    }
-  },
-  {
-    "email": "dummyusernikita19@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyusernikita19"
     }
   }
 ]
