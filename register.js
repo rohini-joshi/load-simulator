@@ -1,6 +1,5 @@
 var when          = require('when');
 var sequence      = require('when/sequence');
-
 var AppMasterKey  = require('./sdk_localhost');
 
 //Register the Users

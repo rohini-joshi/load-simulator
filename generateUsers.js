@@ -1,21 +1,22 @@
 var when         = require('when');
 var fs 					 = require('fs');
 var program      = require('commander');
-var registerUser = require('./register');
+var registerUser = require('./register')
 
-var Users 			 = [];
+var Users 		   = [];
 
 program
-  .version('0.0.2')
+	.version('0.0.2')
   .usage('[options]')
-  .option('-u, --users <n>', 'Specify no of users to be generated',parseInt)
-  .option('-n, --name <n>', 'specify name for dummy user')
-  .option('-a, --actors <n>', 'specify no of users who can comment and like i.e set flag canAct to 1',parseInt)
+  .option('-u, --users <n>', 'Specify number of users to generate', parseInt)
+  .option('-n, --name <n>', 'Speicfy a string to append to the username')
+  .option('-a, --actors <n>', 'Specify no of users who can comment and like i.e set flag canAct to 1', parseInt)
   .parse(process.argv);
 
+// Set default values if not entered through terminal
 program.users  = typeof program.users === 'undefined' ? 1 : program.users;
 program.name   = typeof program.name === 'function' ? 'raw' : program.name;
-program.actors  = typeof program.actors === 'undefined' ? 1 : program.actors;
+program.actors = typeof program.actors === 'undefined' ? 1 : program.actors;
 
 //Generate Dummy Users
 for(i=0; i< program.users; i++){
@@ -27,7 +28,7 @@ for(i=0; i< program.users; i++){
 			"username": "dummyuser"+ program.name + i
 		}
 	};
-	if(i<program.actors){
+	if(i < program.actors){
 		user['canAct'] = 1;
 	}
 	Users.push(user)

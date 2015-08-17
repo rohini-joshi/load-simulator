@@ -29,8 +29,7 @@ program.minLikeCom = typeof program.minLikeCom === 'undefined' ? 1000 : program.
 program.maxLikeCom = typeof program.maxLikeCom === 'undefined' ? 9000: program.maxLikeCom;
 
 // Get the user logged in and make his/her presence public
-function loginUser(user){
-  console.log(App.options)
+function loginUser(user, App){
   var loggedinUser
   return App
   .User().login(user.email,user.password)
@@ -45,19 +44,19 @@ function loginUser(user){
     })
     .then(function(){
       console.log("fetching channels");
-      return fetchChannels(loggedinUser);
+      return fetchChannels(loggedinUser, App);
     })
     .then(function(){
       console.log("fetching chirpss");
-      return fetchChirps(loggedinUser);
+      return fetchChirps(loggedinUser, App);
     })
     .then(function(){
       console.log("fetching users");
-      return fetchUsers(loggedinUser);
+      return fetchUsers(App);
     })
     .then(function(){
       console.log("count ");
-      return getChirpsCount(loggedinUser);
+      return getChirpsCount(loggedinUser, App);
     })
     .then(function(){
       return loggedinUser;
@@ -70,7 +69,7 @@ function loginUser(user){
   
 }
 
-function createChirp(timeInt,user){
+function createChirp(timeInt,user, App){
   setTimeout(function() { //to send chirps from dummy user after a random time interval
     var requestBody = {
       content: "dummy chirp " + user.get('username'),
@@ -83,7 +82,7 @@ function createChirp(timeInt,user){
   },timeInt);
 }
 
-function likeChirp(chirp,timeInt,user){
+function likeChirp(chirp,timeInt,user, App){
   setTimeout(function() { //to like chirps after a random time interval
     if(chirp.get('upvotes') && chirp.get('upvotes').indexOf(userUid)>=0){
       App.Extension
@@ -106,7 +105,7 @@ function likeChirp(chirp,timeInt,user){
 }
 
 //realtime scenario: fetch chirps and channels for user after login
-function getChirpsCount(user){
+function getChirpsCount(user, App){
   var mentionsQuery = App.Class('tweet').Query()
   .containedIn('mentions', user.get('uid'))
   .doesNotExists('post_to');
@@ -120,7 +119,7 @@ function getChirpsCount(user){
   .count()
 }
 
-function fetchChannels(user){
+function fetchChannels(user, App){
   var self   = this;
   var queryChanneltype = App
   .Class('channel_type')
@@ -139,7 +138,7 @@ function fetchChannels(user){
   .exec()
 }
 
-function fetchChirps(user){
+function fetchChirps(user, App){
   var mentionsQuery = App.Class('tweet').Query()
       .doesNotExists('post_to')
       .containedIn('mentions', user.get('uid'));
@@ -181,7 +180,7 @@ function fetchChirps(user){
     return wallChirps.exec();
 }
 
-function fetchUsers(){
+function fetchUsers(App){
   return App
   .Class('built_io_application_user')
   .Query()
@@ -190,7 +189,7 @@ function fetchUsers(){
   .exec()
 }
 
-function comment(chirp,timeInt,user){
+function comment(chirp,timeInt,user, App){
   setTimeout(function() { //to comment on chirp after a random time interval
     App.Extension.execute('addComment',{
       content: "dummy comment "+user.get('username'),
@@ -204,7 +203,8 @@ function comment(chirp,timeInt,user){
 
 if (cluster.isMaster) {
   // Fork workers.
-  for (var i = 0; i < numUser; i++) {
+  var canLogin     = program.login;
+  for (var i = 0; i < canLogin; i++) {
     cluster.fork();
   }
   cluster.on('exit', function(worker, code, signal) {
@@ -212,30 +212,28 @@ if (cluster.isMaster) {
   });
 } else{
     var userId       = cluster.worker.id - 1;
-    var chirpCount   = program.canChirp;
-    var canLogin     = program.login;
+    var chirpCount   = program.canChirp;    
     var repeat       = program.repeat;
     //Create dummy chirps
-    if(cluster.worker.id <= canLogin){
+    // if(cluster.worker.id <= canLogin){
       var App = require('./sdk_localhost')
                 .enableRealtime();
       console.log("in if of can login");
-      App.options.userJSON = "pandu"
-      loginUser(Users[userId])
+      loginUser(Users[userId], App)
       .then(function(user){
         App.Class('tweet').Object
         .on('create',function(chirp){
           if(Users[userId].canAct === 1){
-            sequence([comment],chirp,Math.floor(Math.random() * (program.maxLikeCom - program.minLikeCom + 1) + program.minLikeCom),user);
+            sequence([comment],chirp,Math.floor(Math.random() * (program.maxLikeCom - program.minLikeCom + 1) + program.minLikeCom),user, App);
           }
         });
         
         if(cluster.worker.id <= chirpCount){
           for(var i=0;i<repeat;i++){
             console.log("in repeat after ",repeat);
-            createChirp(Math.floor(Math.random() * (program.maxChirp - program.minChirp + 1) + program.minChirp),user);
+            createChirp(Math.floor(Math.random() * (program.maxChirp - program.minChirp + 1) + program.minChirp),user, App);
           }
         }
   		})
-    }
+    // }
 	}

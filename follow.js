@@ -7,10 +7,10 @@ var AppMasterKey = require('./sdk_localhost');
 		AppMasterKey = AppMasterKey
 									 .setMasterKey(masterKey);
 program
-  .version('0.0.2')
+	.version('0.0.2')
   .usage('[options]')
   .option('-u, --username <n>', 'Specify your chirp username')
-  .parse(process.argv);
+  .parse(process.argv)
 
 AppMasterKey.Class('built_io_application_user').Query()
 .matches('username','^dummyuser')
