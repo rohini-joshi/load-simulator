@@ -25,8 +25,8 @@ program.login      = typeof program.login === 'undefined' ? 1 : program.login;
 program.repeat     = typeof program.repeat === 'undefined' ? 1 : program.repeat;
 program.minChirp   = typeof program.minChirp === 'undefined' ? 1000 : program.minChirp;
 program.maxChirp   = typeof program.maxChirp === 'undefined' ? 9000 : program.maxChirp;
-program.minLikeCom = typeof program.minLikeCom === 'undefined' ? 1000 : program.minLikeCom;
-program.maxLikeCom = typeof program.maxLikeCom === 'undefined' ? 9000: program.maxLikeCom;
+program.minLikeCom = typeof program.minLikeCom === 'undefined' ? 10000 : program.minLikeCom;
+program.maxLikeCom = typeof program.maxLikeCom === 'undefined' ? 90000: program.maxLikeCom;
 
 // Get the user logged in and make his/her presence public
 function loginUser(user, App){
