@@ -1,4 +1,3 @@
-var fs           = require('fs');
 var cluster      = require('cluster');
 var when         = require('when');
 var sequence     = require('when/sequence');
@@ -13,20 +12,22 @@ program
   .usage('[options]')
   .option('-c, --canChirp <n>', 'Specify no of users who can post chirp',parseInt)
   .option('-l, --login <n>', 'Specify no of users who can login',parseInt)
+  .option('-t, --logintime <n>', 'To make users login at different time',parseInt)
   .option('-r, --repeat <n>', 'specify number of times user should chirp',parseInt)
   .option('-s, --minChirp <n>', 'min delay in millisec for chirp creation',parseInt)
-  .option('-l, --maxChirp <n>', 'max delay in millisec for chirp creation',parseInt)
+  .option('-m, --maxChirp <n>', 'max delay in millisec for chirp creation',parseInt)
   .option('-S, --minLikeCom <n>', 'min delay in millisec for chirp like and comment',parseInt)
   .option('-L, --maxLikeCom <n>', 'max delay in millisec for chirp like and comment',parseInt)
   .parse(process.argv);
 
 program.canChirp   = typeof program.canChirp === 'undefined' ? 1 : program.canChirp;
 program.login      = typeof program.login === 'undefined' ? 1 : program.login;
+program.logintime  = typeof program.logintime === 'undefined' ? 9000 : program.logintime;
 program.repeat     = typeof program.repeat === 'undefined' ? 1 : program.repeat;
 program.minChirp   = typeof program.minChirp === 'undefined' ? 1000 : program.minChirp;
 program.maxChirp   = typeof program.maxChirp === 'undefined' ? 9000 : program.maxChirp;
-program.minLikeCom = typeof program.minLikeCom === 'undefined' ? 1000 : program.minLikeCom;
-program.maxLikeCom = typeof program.maxLikeCom === 'undefined' ? 9000: program.maxLikeCom;
+program.minLikeCom = typeof program.minLikeCom === 'undefined' ? 10000 : program.minLikeCom;
+program.maxLikeCom = typeof program.maxLikeCom === 'undefined' ? 90000: program.maxLikeCom;
 
 // Get the user logged in and make his/her presence public
 function loginUser(user, App){
@@ -36,41 +37,38 @@ function loginUser(user, App){
   .then(function(loggeduser){
       loggedinUser = loggeduser
       return App.User.getPresence()    
-      // return loggeduser.getPresence()
-    })
-    .then(function(presence){
-      return presence
-        .setPublic(true)
-        .save() 
-    })
-    .then(function(){
-      return when.all([
-        fetchChannels(loggedinUser, App),
-        fetchChirps(loggedinUser, App),
-        fetchUsers(App),
-        getChirpsCount(loggedinUser, App)
-      ]);
-    })
-    .then(function(){
-      return loggedinUser;
-    })
-    .catch(function(err){
-      console.log("err in fetching", err);
-      cluster.worker.kill()
-    })
-    // return loggedinUser;
-  
+  })
+  .then(function(presence){
+    return presence
+      .setPublic(true)
+      .save() 
+  })
+  .then(function(){
+    return when.all([
+      fetchChannels(loggedinUser, App),
+      fetchChirps(loggedinUser, App),
+      fetchUsers(App),
+      getChirpsCount(loggedinUser, App)
+    ]);
+  })
+  .then(function(){
+    return loggedinUser;
+  })
+  .catch(function(err){
+    console.log("err in fetching", JSON.stringify(err,null,2));
+    cluster.worker.kill()
+  })
 }
 
 function createChirp(timeInt,user, App){
   setTimeout(function() { //to send chirps from dummy user after a random time interval
     var requestBody = {
-      content: "dummy chirp " + user.get('username'),
+      content: "dummy chirp" + user.get('username'),
       images: []
     }
     App.Extension.execute('createTweet',requestBody)
     .then(function(chirp){
-      console.log("chirp created");
+      console.log("chirp created ",user.get('username'));
     })
   },timeInt);
 }
@@ -202,7 +200,9 @@ function comment(chirp,timeInt,user, App){
       chirp_uid: chirp.get('uid')
     })
     .then(function(){
-      console.log("commented",user.get('uid'));
+      console.log("commented",user.get('username'));
+    },function(err){
+      console.error("error in add comment ", JSON.stringify(err,null,2));
     })
   },timeInt);
 }
@@ -211,7 +211,9 @@ if (cluster.isMaster) {
   // Fork workers.
   var canLogin     = program.login;
   for (var i = 0; i < canLogin; i++) {
-    cluster.fork();
+    setTimeout(function(){
+      cluster.fork();
+    },Math.floor(Math.random() * (program.logintime - 1000 + 1) + 1000));
   }
   cluster.on('exit', function(worker, code, signal) {
     console.log('worker ' + worker.process.pid + ' died');
@@ -227,6 +229,7 @@ if (cluster.isMaster) {
       console.log("in if of can login");
       loginUser(Users[userId], App)
       .then(function(user){
+        console.log("logged in user",user.get('username'));
         App.Class('tweet').Object
         .on('create',function(chirp){
           if(Users[userId].canAct === 1){

@@ -11,7 +11,7 @@ AppMasterKey.Class('built_io_application_user').Query()
 .matches('username','^dummyuser')
 .exec()
 .then(function(dummyUsers){
-	users.map(function(user){
+	users.map(function(user,i){
 		var uidArr = dummyUsers.filter(function(dummyUser){
 			return dummyUser.get('username') !== user.extra_fields.username;
 		}).map(function(filtereduser){
@@ -26,7 +26,7 @@ AppMasterKey.Class('built_io_application_user').Query()
 			.timeless()
 			.save()
 			.then(function(){
-				console.log("followed");
+				console.log("followed",i);
 			})
 		})
 	})
