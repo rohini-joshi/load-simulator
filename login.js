@@ -22,7 +22,7 @@ program
 
 program.canChirp   = typeof program.canChirp === 'undefined' ? 1 : program.canChirp;
 program.login      = typeof program.login === 'undefined' ? 1 : program.login;
-program.logintime  = typeof program.logintime === 'undefined' ? 9000 : program.logintime;
+program.logintime  = typeof program.logintime === 'undefined' ? 5000 : program.logintime;
 program.repeat     = typeof program.repeat === 'undefined' ? 1 : program.repeat;
 program.minChirp   = typeof program.minChirp === 'undefined' ? 1000 : program.minChirp;
 program.maxChirp   = typeof program.maxChirp === 'undefined' ? 9000 : program.maxChirp;
@@ -213,7 +213,7 @@ if (cluster.isMaster) {
   for (var i = 0; i < canLogin; i++) {
     setTimeout(function(){
       cluster.fork();
-    },Math.floor(Math.random() * (program.logintime - 1000 + 1) + 1000));
+    },program.logintime*i);
   }
   cluster.on('exit', function(worker, code, signal) {
     console.log('worker ' + worker.process.pid + ' died');

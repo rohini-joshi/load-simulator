@@ -3,14 +3,17 @@ var program    = require('commander');
 var fs         = require('fs');
 var App        = require('./sdk_localhost')
 								 .enableRealtime();
+var masterKey  = 'blt73275122067fbf70';
 
 program
   .version('0.0.2')
   .usage('[options]')
   .option('-a, --action <n>', 'Specify user action')
+  .option('-c, --content <n>', 'Specify chirp and comment content')
   .parse(process.argv);
 
 program.action = typeof program.action === 'function' ? 'register' : program.action;
+program.content = typeof program.content === 'function' ? 'default' : program.content;
 
 var user       = {
   "email": "loadtestsub@testraweng.com",
@@ -44,6 +47,15 @@ function login(){
 	return App
   .User().login(user.email,user.password)
   .then(function(loggeduser){
+  	App.Class('tweet').Object
+    .on('create',function(chirp){
+      if(chirp.get('content') === program.content+'loadtestsub'){
+       	console.log(chirp.get('content'), new Date());
+       	metrics.createChirp.ReceiveRealTime = new Date();
+	  	  metrics.createChirp.ElapsedRealTime = metrics.createChirp.ReceiveRealTime - metrics.createChirp.SendTime;
+			  fs.writeFileSync('responseMetrics.json', JSON.stringify(metrics,'\t',2));
+      }
+    });
   	console.log("after login");
 		metrics.login.ReceiveTime = new Date();
 	  metrics.login.ElapsedTime = metrics.login.ReceiveTime - metrics.login.SendTime;
@@ -82,7 +94,7 @@ function createChirp(){
 	metrics.createChirp          = {}
 	metrics.createChirp.SendTime = new Date();
 	var requestBody = {
-    content: "subject chirp" + builtUser.get('username'),
+    content: program.content + builtUser.get('username'),
     images: []
   }
   return App.Extension.execute('createTweet',requestBody)
@@ -93,7 +105,7 @@ function comment(chirp){
 	metrics.onComment          = {}
 	metrics.onComment.SendTime = new Date();
   return App.Extension.execute('addComment',{
-    content: "subject comment "+builtUser.get('username'),
+    content: program.content+builtUser.get('username'),
     chirp_uid: chirp.uid
   })
 }
@@ -199,35 +211,92 @@ function fetchUsers(App){
     console.log("users fetched");
   })
 }
+function deleteChirps(){
+  App = App.setMasterKey(masterKey);
+  App.Class('built_io_application_user')
+  .Query()
+  .where('username',user.extra_fields.username)
+  .exec()
+  .then(function(dummyUser){
+    return dummyUser.map(function(user){
+      App.Class('tweet').Query()
+      .where('app_user_object_uid',user.get('uid'))
+      .exec()
+      .then(function(chirps){      //Delete the chirps of the user along with the comments
+        return chirps.map(function(chirp){
+          var chirp_uid = chirp.get('uid');
+          chirp.delete()
+          .then(function(){       //Delete the comments 
+            return App.Class('comment').Query()
+            .where('chirp_uid', chirp_uid)
+            .delete()
+          })
+        })
+      })
+      .then(function(){ //Delete the users
+        console.log("successfully deleted");
+       // user.delete()
+      })
+    })
+  })
+}
 
 
 switch(program.action){
 	case 'register':
 		register();
 		break;
+	case 'follow':
+		App = App.setMasterKey(masterKey);
+		App.Class('built_io_application_user').Query()
+		.matches('username','^dummyuser')
+		.exec()
+		.then(function(dummyUsers){
+			//to follow all dummy users
+			var dummyUidArr = dummyUsers.map(function(dummyUser){
+				return dummyUser.get('uid');
+			});
+
+			App.Class('built_io_application_user').Query()
+			.where('username',user.extra_fields.username)
+			.exec()
+			.then(function(user){
+				user[0]
+				.pushValue('follows', dummyUidArr)
+				.timeless()
+				.save()
+				.then(function(){
+					console.log("followed");
+					process.exit();
+				})
+			})
+		})
+		break;
+  case 'delete':
+    deleteChirps();
+    break;
 	case 'login':
 		login()
 		.then(function(user){
 			return createChirp();
 		})
 		.then(function(chirp){
+			console.log("chirped");
 			metrics.createChirp.ReceiveTime = new Date();
 	  	metrics.createChirp.ElapsedTime = metrics.createChirp.ReceiveTime - metrics.createChirp.SendTime;
 			return comment(chirp);
-		},function(err){
-			console.log("in chirp",err);
-		})
+		},function(err){console.log("err in chirp ",err,JSON.stringify(err,null,2))})
 		.then(function(comment){
 			console.log("commented");
 			metrics.onComment.ReceiveTime = new Date();
 	  	metrics.onComment.ElapsedTime = metrics.onComment.ReceiveTime - metrics.onComment.SendTime;
 			fs.writeFileSync('responseMetrics.json', JSON.stringify(metrics,'\t',2));
-			process.exit();
-		},function(err){
-			console.log("in comment",err);
-		})
+			//process.exit();
+		},function(err){console.log("err in comment ",err,JSON.stringify(err,null,2))})
 		.catch(function(err){
-      console.log("err after login ",err /*JSON.stringify(err,null,2)*/);
+      console.log("err after login ",err, JSON.stringify(err,null,2));
+			fs.writeFileSync('responseMetrics.json', JSON.stringify(metrics,'\t',2));
+			//process.exit();
     })
     break;
   default: console.log("do something"); 	
