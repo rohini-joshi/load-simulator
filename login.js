@@ -18,7 +18,7 @@ program
 
 program.canChirp   = typeof program.canChirp === 'undefined' ? 1 : program.canChirp;
 program.login      = typeof program.login === 'undefined' ? 1 : program.login;
-program.logintime  = typeof program.logintime === 'undefined' ? 5000 : program.logintime;
+program.logintime  = typeof program.logintime === 'undefined' ? 1000 : program.logintime;
 program.repeat     = typeof program.repeat === 'undefined' ? 1 : program.repeat;
 
 // Get the user logged in and make his/her presence public
@@ -213,27 +213,28 @@ if (cluster.isMaster) {
     var userId       = cluster.worker.id - 1;
     var chirpCount   = program.canChirp;    
     var repeat       = program.repeat;
-    //Create dummy chirps
-    var App = require('./sdk_localhost')
-              .enableRealtime();
-      //console.log("login called ",new Date());
-      //console.log("in if of can login");
-      loginUser(Users[userId], App)
-      .then(function(user){
-        console.log("logged in user",user.get('username'));
-        App.Class('tweet').Object
-        .on('create',function(chirp){
-          if(Users[userId].canAct === 1){
-            sequence([comment],chirp,user, App);
-          }
-        });
-        
-        if(cluster.worker.id <= chirpCount){
-          for(var i=0;i<repeat;i++){
-            //console.log("in repeat after ",repeat);
-            createChirp(user, App);
-          }
+    var App          = require('./sdk_localhost')
+                       .enableRealtime();
+
+    //console.log("login called ",new Date());
+    //console.log("in if of can login");
+    loginUser(Users[userId], App)
+    .then(function(user){
+      console.log("logged in user",user.get('username'));
+      App.Class('tweet').Object
+      .on('create',function(chirp){
+        if(Users[userId].canAct === 1){
+          console.log("into comment ");
+          sequence([comment],chirp,user, App);
         }
-  		})
-    // }
+      });
+      if(cluster.worker.id <= chirpCount){
+        for(var i=0;i<repeat;i++){
+          //console.log("in repeat after ",repeat);
+          setTimeout(function(){
+            createChirp(user, App);
+          },program.logintime*i);
+        }
+      }
+		})
 	}
