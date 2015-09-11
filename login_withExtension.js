@@ -47,7 +47,7 @@ function loginUser(user, App){
     return loggedinUser;
   })
   .catch(function(err){
-    console.error("err in fetching",cluster.worker.id, err, JSON.stringify(err,null,2));
+    console.log("err in fetching", JSON.stringify(err,null,2));
     cluster.worker.kill()
   })
 }
@@ -59,197 +59,30 @@ function createChirp(user, App){
     content: "dummy chirp" + user.get('username'),
     images: []
   }
-  // App.Extension.execute('createTweet',requestBody)
-  mimicCreateChirpExt(requestBody, App)
+  App.Extension.execute('createTweet',requestBody)
   .then(function(chirp){
     console.log("chirp created", cluster.worker.id, chirpCreateCount++);
     /*if(Users[userId].canAct === 1){
     sequence([comment], chirp, user, App);
     }*/
+    //console.log("chirp created ",user.get('username'));
   },function(err){
-    console.log("err in chirps", cluster.worker.id, err)
+    console.error("error in create tweet ",cluster.worker.id, JSON.stringify(err,null,2));
   })
-
-}
-
-function mimicCreateChirpExt(requestBody, App){
-  var deffered = when.defer()
-  var comment_count = requestBody.comment_count; // By default the comment_count is set to undefined so all numeric operations fail
-  var post_to       = requestBody.post_to;
-  var poll_uid      = requestBody.poll_uid;
-  var images        = requestBody.images;
-  var authtoken     = App.getAuthToken();
-  var content       = requestBody.content || "";
-  var userUid       = null;
-  var mentions      = [];
-  var regex         = /(<([^>]+)>)/ig;
-  content           = content.replace(regex, ""); // Code to remove html tags
-  var channel       = null;
-
-  if(comment_count === undefined)
-    comment_count = 0;
-
-  var usernames = (content.match(/@[a-zA-Z0-9_.]+/g)||[]).filter(function(a, b, c) {
-    return (c.indexOf(a, b+1) == -1);
-  }).map(function(username) { return username.slice(1, username.length) });
-  
-  var user_uids = [];
-  
-  getMentionedUsersUid(usernames)
-  .then(function(mentioned){
-    //Retrieve mentions
-    mentions = mentioned;
-    return mentions;
-  })
-  .then(function(){
-    //Get current logged-in user
-    return getUserSession(authtoken, App)
-    .then(function(user) {
-      userUid = user.get('uid')
-      return userUid;
-    })
-  })
-  .then(function(){
-    if (post_to) {
-      AppMasterKey.Class('channel')
-      .Object(post_to)
-      .fetch()
-      .then(function(channelObj) {
-        channel = channelObj;
-        return AppMasterKey
-          .Class('channel_type')
-          .Object()
-          .set('uid', channel.get('type')[0])
-          .fetch()
-      })
-      .then(function(type){
-        var type    = type.get('type');
-        var canPost = channel.get('can_post') || [];
-        var admins  = channel.get('admins') || [];
-        var canRead = channel.get('members') || [];
-        if(isAllowedToPost(userUid, canRead, canPost, admins, type)){
-          var read  = channel.get('ACL').roles[0].uid;
-          var write = channel.get('ACL').roles[1].uid;
-          var ACL   = new Built.ACL();
-          if(type == 'private'){
-            ACL.setUserReadAccess('anonymous', false)
-            ACL.setUserWriteAccess('anonymous', false)
-            ACL.setUserDeleteAccess('anonymous', false)
-            ACL.setPublicReadAccess(false)
-            ACL.setRoleReadAccess(read, true)
-            ACL.setRoleReadAccess(write, true)
-          }else{
-            ACL.setPublicReadAccess('true');
-          }
-          return ACL;
-        }else{
-          throw new Error("Access denined");
-        }
-      })
-      .then(function(ACL){
-        return constructTweet()
-        .setACL(ACL)
-        .save()
-      })
-      .then(function(tweet){
-        return deffered.resolve(tweet.toJSON());
-      })
-      .catch(function(err){
-        return deffered.reject("Access denined, You don't have sufficient permissions to post on this channel.");
-      })
-    }else{
-      constructTweet().save()
-      .then(function(tweet){
-        return deffered.resolve(tweet.toJSON());
-      })
-    }
-  })
-  .catch(function(err){
-    return deffered.reject(err);
-  })
-
-  //Constructs SDK object
-  function constructTweet(){
-    return App // App with current user's authtoken in it
-      .Class('tweet')
-      .Object({
-        comment_count: comment_count,
-        post_to : post_to,
-        poll    : poll_uid,
-        mentions: mentions,
-        content : content,
-        images  : images
-      })
-  }
-
-  return deffered.promise
-}
-
-function getMentionedUsersUid(usernames) {
-  var user_uids = [];
-  if (usernames.length == 0) {
-    return when(user_uids);
-  } else {
-    return App.Class('built_io_application_user')
-    .Query()
-    .containedIn('username', usernames)
-    .only('uid')
-    .exec()
-    .then(function(objects) {
-      user_uids = user_uids.concat(objects.map(function(obj) {
-        return obj.get('uid')
-      }));
-      return user_uids;
-    });
-  }
-
-}
-
-function getUserSession(authtoken, App){
-  var authApp = App.setAuthToken(authtoken);
-  return authApp.User.getSession(true);
 }
 
 function comment(chirp, user, App){
   //to comment on chirp after a random time interval
   // console.log("in comment ",new Date());
-  // App.Extension.execute('addComment',{
-  //   content: "dummy comment "+user.get('username'),
-  //   chirp_uid: chirp.uid
-  // })
-  mimicAddCommentExt({
+  App.Extension.execute('addComment',{
     content: "dummy comment "+user.get('username'),
     chirp_uid: chirp.get('uid')
-  }, App)
+  })
   .then(function(){
     console.log('commented', cluster.worker.id, commentCreateCount++)
   },function(err){
-    console.error("error in add comment ",cluster.worker.id, JSON.stringify(err,null,2));
+    console.error("error in add comment ",cluster.worker.id, JSON.stringify(err.entity,null,2));
   })
-}
-
-function mimicAddCommentExt(requestBody, App) {
-  var deffered  = when.defer()
-  var chirp_uid = requestBody.chirp_uid;
-  App.Class('tweet').Object(chirp_uid)
-  .assign({
-    comment_preview: [{
-      content   : requestBody.content,
-      chirp_uid : chirp_uid
-    }],
-  })
-  .increment('comment_count', 1)
-  .save()
-  .then(function(tweet) {
-    App.Class('comment').Object(tweet.get('comment_preview')[0])
-    .fetch()
-    .then(function(comment){
-      return deffered.resolve(comment.toJSON());
-    })
-  },function(error){
-    return deffered.reject(error);
-  })
-  return deffered.promise
 }
 
 function likeChirp(chirp,timeInt,user, App){
@@ -392,7 +225,6 @@ if (cluster.isMaster) {
                        .enableRealtime();
     var chirpCreateCount = 1
     var commentCreateCount = 1
-
     //console.log("login called ",new Date());
     //console.log("in if of can login");
     loginUser(Users[userId], App)
@@ -401,16 +233,17 @@ if (cluster.isMaster) {
       console.log("logged in user",user.get('username'));
       App.Class('tweet').Object
       .on('create',function(chirp){
-        if(Users[userId].canAct === 1 && cluster.worker.id <= chirpCount){
-          sequence([comment], chirp, user, App.setMasterKey('blt73275122067fbf70'));
+        if(Users[userId].canAct === 1  && cluster.worker.id <= chirpCount){
+          // console.log("into comment ");
+          sequence([comment], chirp, user, App);
         }
       });
       if(cluster.worker.id <= chirpCount){
         // for(var i=0;i<repeat;i++){
-          //console.log("in repeat after ",repeat);
+          console.log("in repeat after ", cluster.worker.id);
           var interval = setInterval(function(){
             // console.log(cluster.worker.id, chirpCount1++)
-            createChirp(user, App.setMasterKey('blt73275122067fbf70'));
+            createChirp(user, App);
           }, program.logintime);
 
           setTimeout(function(){

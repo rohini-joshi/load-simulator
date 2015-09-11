@@ -2,6 +2,7 @@ var when       = require('when');
 var program    = require('commander');
 var fs         = require('fs');
 var App        = require('./sdk_localhost')
+                .persistSessionWith('MEMORY')
 								 .enableRealtime();
 var masterKey  = 'blt73275122067fbf70';
 
@@ -85,7 +86,7 @@ function login(){
     return builtUser;
   })
   .catch(function(err){
-    console.log("err in fetching",err /*JSON.stringify(err,null,2)*/);
+    console.log("err in fetching",err, JSON.stringify(err,null,2));
   })
 }
 
@@ -297,6 +298,25 @@ switch(program.action){
       console.log("err after login ",err, JSON.stringify(err,null,2));
 			fs.writeFileSync('responseMetrics.json', JSON.stringify(metrics,'\t',2));
 			//process.exit();
+    })
+    break;
+    case 'realtime':
+    login()
+    .then(function(user){
+      var Chirpcount    = 1
+      var CommentCount  = 1
+      App.Class('tweet').Object.on('create', function (tweet) {
+        console.log(Chirpcount++ ,"Chirp Elapsed Time",new Date() - new Date(tweet.get('created_at')), tweet.get('app_user_object_uid'))
+      })
+
+      App.Class('comment').Object.on('create', function (comment) {
+        console.log(CommentCount++,"Comment Elapsed Time",new Date() - new Date(comment.get('created_at')), comment.get('app_user_object_uid'))
+      })
+    })
+    .catch(function(err){
+      console.log("err after login ",err, JSON.stringify(err,null,2));
+      fs.writeFileSync('responseMetrics.json', JSON.stringify(metrics,'\t',2));
+      //process.exit();
     })
     break;
   default: console.log("do something"); 	

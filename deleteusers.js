@@ -27,7 +27,7 @@ function deleteUsers(){
 					})
 				})
 			})
-			.then(function(){
+			/*.then(function(){
 				AppMasterKey.Class('built_io_application_user').Query()
 				.where('follows',user.get('uid'))
 				.exec()
@@ -47,8 +47,8 @@ function deleteUsers(){
 			})
 	    .then(function(){ //Delete the users
 				console.log("successfully deleted");
-				user.delete()
-			})
+				//user.delete()
+			})*/
  	  })
   })
 }

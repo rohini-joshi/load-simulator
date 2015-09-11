@@ -6,7 +6,9 @@ var APP_UID       = 'chirptest';
 
 
 var BuiltSDK      = require('built.io-browserify');
-var App           = BuiltSDK.App(API_KEY)
+var App           = BuiltSDK.App(API_KEY,{
+	host:API_URL
+})
 										.setHost(API_URL)
 										.setProtocol('https')
 										.setRtHost(RT_API_URL)

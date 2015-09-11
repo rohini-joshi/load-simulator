@@ -7,10 +7,12 @@ var APP_UID       = 'chirp';
 
 
 var BuiltSDK      = require('built.io-browserify');
-var App           = BuiltSDK.App(API_KEY)
+var App           = BuiltSDK.App(API_KEY,{
+	host:API_URL
+})
 .setHost(API_URL)
 .setProtocol('https')
 .setRtHost(RT_API_URL)
-.persistSessionWith(BuiltSDK.Session.LOCAL_STORAGE)
+.persistSessionWith(BuiltSDK.Session.MEMORY)
 
 module.exports =  App  = App;
