@@ -56,7 +56,7 @@ function createChirp(user, App){
   //to send chirps from dummy user after a random time interval
   // console.log("in create chirp ",new Date());
   var requestBody = {
-    content: "dummy chirp" + user.get('username'),
+    content: "dummy chirp " + user.get('username') + new Date(),
     images: []
   }
   App.Extension.execute('createTweet',requestBody)
@@ -75,7 +75,7 @@ function comment(chirp, user, App){
   //to comment on chirp after a random time interval
   // console.log("in comment ",new Date());
   App.Extension.execute('addComment',{
-    content: "dummy comment "+user.get('username'),
+    content: "dummy comment "+user.get('username')+" "+chirp.get('uid') + " " + new Date(),
     chirp_uid: chirp.get('uid')
   })
   .then(function(){
@@ -249,7 +249,7 @@ if (cluster.isMaster) {
           setTimeout(function(){
             console.log("end of timeout")
             clearInterval(interval)
-          }, 21000)
+          }, 31000)
 
         // }
       }

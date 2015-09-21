@@ -56,7 +56,7 @@ function createChirp(user, App){
   //to send chirps from dummy user after a random time interval
   // console.log("in create chirp ",new Date());
   var requestBody = {
-    content: "dummy chirp" + user.get('username'),
+    content: "dummy chirp" + user.get('username') + new Date(),
     images: []
   }
   // App.Extension.execute('createTweet',requestBody)
@@ -218,7 +218,7 @@ function comment(chirp, user, App){
   //   chirp_uid: chirp.uid
   // })
   mimicAddCommentExt({
-    content: "dummy comment "+user.get('username'),
+    content: "dummy comment "+user.get('username')+" "+new Date(),
     chirp_uid: chirp.get('uid')
   }, App)
   .then(function(){
@@ -231,7 +231,7 @@ function comment(chirp, user, App){
 function mimicAddCommentExt(requestBody, App) {
   var deffered  = when.defer()
   var chirp_uid = requestBody.chirp_uid;
-  App.Class('tweet').Object(chirp_uid)
+  /*App.Class('tweet').Object(chirp_uid)
   .assign({
     comment_preview: [{
       content   : requestBody.content,
@@ -249,7 +249,20 @@ function mimicAddCommentExt(requestBody, App) {
   },function(error){
     return deffered.reject(error);
   })
-  return deffered.promise
+  return deffered.promise*/
+      App 
+      .Class('comment')
+      .Object({
+        content   : requestBody.content,
+        chirp_uid : chirp_uid
+      })
+      .save()
+      .then(function(comment){
+        return deffered.resolve(comment.toJSON());
+      },function(error){
+        return deffered.reject(error);
+      })
+      return deffered.promise
 }
 
 function likeChirp(chirp,timeInt,user, App){
@@ -416,7 +429,7 @@ if (cluster.isMaster) {
           setTimeout(function(){
             console.log("end of timeout")
             clearInterval(interval)
-          }, 21000)
+          }, 31000)
 
         // }
       }

@@ -306,11 +306,11 @@ switch(program.action){
       var Chirpcount    = 1
       var CommentCount  = 1
       App.Class('tweet').Object.on('create', function (tweet) {
-        console.log(Chirpcount++ ,"Chirp Elapsed Time",new Date() - new Date(tweet.get('created_at')), tweet.get('app_user_object_uid'))
+        console.log(Chirpcount++ ,"Chirp Elapsed Time",new Date() - new Date(tweet.get('created_at')), tweet.get('uid'))
       })
 
       App.Class('comment').Object.on('create', function (comment) {
-        console.log(CommentCount++,"Comment Elapsed Time",new Date() - new Date(comment.get('created_at')), comment.get('app_user_object_uid'))
+        console.log(CommentCount++,"Comment Elapsed Time",new Date() - new Date(comment.get('created_at')), comment.get('uid'), comment.get('chirp_uid')[0])
       })
     })
     .catch(function(err){
