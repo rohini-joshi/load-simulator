@@ -14,7 +14,7 @@ program
   .parse(process.argv)
 
 AppMasterKey.Class('built_io_application_user').Query()
-.matches('username','^dummyuser')
+.matches('email','^dummyuser')
 .exec()
 .then(function(dummyUsers){
 	//to follow all dummy users

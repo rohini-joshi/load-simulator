@@ -27,6 +27,9 @@ function loginUser(user, App){
   return App
   .User().login(user.email,user.password)
   .then(function(loggeduser){
+      loggeduser.updateUserProfile({
+        username: loggeduser.get('email').split('@')[0]
+      })
       loggedinUser = loggeduser
       return App.User.getPresence()    
   })
