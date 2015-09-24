@@ -1,10 +1,10 @@
 var when       = require('when');
 var program    = require('commander');
 var fs         = require('fs');
-var App        = require('./sdk_localhost')
+var App        = require('./sdk_localhost').App
                 .persistSessionWith('MEMORY')
 								 .enableRealtime();
-var masterKey  = 'blt73275122067fbf70';
+var masterKey  = require('./sdk_localhost').masterKey
 
 program
   .version('0.0.2')

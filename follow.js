@@ -3,8 +3,8 @@ var program      = require('commander');
 var sequence     = require('when/sequence');
 
 var users        = require('./users.json');
-var masterKey    = 'blt73275122067fbf70';
-var AppMasterKey = require('./sdk_localhost');
+var masterKey    = require('./sdk_localhost').masterKey
+var AppMasterKey = require('./sdk_localhost').App;
 		AppMasterKey = AppMasterKey
 									 .setMasterKey(masterKey);
 program

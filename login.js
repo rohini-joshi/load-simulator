@@ -14,12 +14,16 @@ program
   .option('-l, --login <n>', 'Specify no of users who can login',parseInt)
   .option('-t, --logintime <n>', 'To make users login at different time',parseInt)
   .option('-r, --repeat <n>', 'specify number of times user should chirp',parseInt)
+  .option('-s, --start <n>', 'specify the start index for login',parseInt)
+  .option('-e, --end <n>', 'specify the end index of login',parseInt)
   .parse(process.argv);
 
 program.canChirp   = typeof program.canChirp === 'undefined' ? 1 : program.canChirp;
 program.login      = typeof program.login === 'undefined' ? 1 : program.login;
 program.logintime  = typeof program.logintime === 'undefined' ? 1000 : program.logintime;
 program.repeat     = typeof program.repeat === 'undefined' ? 1 : program.repeat;
+program.start      = typeof program.start === 'undefined' ? 0 : program.start;
+program.end        = typeof program.end === 'undefined' ? 29 : program.end;
 
 // Get the user logged in and make his/her presence public
 function loginUser(user, App){
@@ -388,7 +392,7 @@ function fetchUsers(App){
 if (cluster.isMaster) {
   // Fork workers.
   var canLogin     = program.login;
-  for (var i = 0; i < canLogin; i++) {
+  for (var i = program.start; i <= program.end; i++) {
     setTimeout(function(){
       cluster.fork();
     },program.logintime*i);
@@ -397,10 +401,12 @@ if (cluster.isMaster) {
     //console.log('worker ' + worker.process.pid + ' died');
   });
 } else{
-    var userId       = cluster.worker.id - 1;
+    var userId       = cluster.worker.id - 1 + program.start;
+    console.log("userid ",userId);
     var chirpCount   = program.canChirp;    
     var repeat       = program.repeat;
-    var App          = require('./sdk_localhost')
+    var masterKey    = require('./sdk_localhost').masterKey
+    var App          = require('./sdk_localhost').App
                       .persistSessionWith('MEMORY')
                        .enableRealtime();
     var chirpCreateCount = 1
@@ -415,7 +421,7 @@ if (cluster.isMaster) {
       App.Class('tweet').Object
       .on('create',function(chirp){
         if(Users[userId].canAct === 1 && cluster.worker.id <= chirpCount){
-          sequence([comment], chirp, user, App.setMasterKey('blt73275122067fbf70'));
+          sequence([comment], chirp, user, App.setMasterKey(masterKey));
         }
       });
       if(cluster.worker.id <= chirpCount){
@@ -423,7 +429,7 @@ if (cluster.isMaster) {
           //console.log("in repeat after ",repeat);
           var interval = setInterval(function(){
             // console.log(cluster.worker.id, chirpCount1++)
-            createChirp(user, App.setMasterKey('blt73275122067fbf70'));
+            createChirp(user, App.setMasterKey(masterKey));
           }, program.logintime);
 
           setTimeout(function(){

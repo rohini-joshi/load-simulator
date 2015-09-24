@@ -1,8 +1,8 @@
 var when         = require('when');
 var fs           = require('fs');
 var sequence     = require('when/sequence');
-var masterKey    = 'blt73275122067fbf70';
-var AppMasterKey = require('./sdk_localhost')
+var masterKey    = require('./sdk_localhost').masterKey
+var AppMasterKey = require('./sdk_localhost').App
     AppMasterKey = AppMasterKey
 									 .setMasterKey(masterKey);
 
@@ -27,7 +27,7 @@ function deleteUsers(){
 					})
 				})
 			})
-			.then(function(){
+			.then(function(){ //Remove from follows
 				AppMasterKey.Class('built_io_application_user').Query()
 				.where('follows',user.get('uid'))
 				.exec()
@@ -45,10 +45,10 @@ function deleteUsers(){
 					return sequence(arr);
 			  })
 			})
-	    /*.then(function(){ //Delete the users
+	    .then(function(){ //Delete the users
 				console.log("successfully deleted");
-				//user.delete()
-			})*/
+				user.delete()
+			})
  	  })
   })
 }

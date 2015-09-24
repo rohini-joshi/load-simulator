@@ -11,15 +11,19 @@ program
   .version('0.0.2')
   .usage('[options]')
   .option('-c, --canChirp <n>', 'Specify no of users who can post chirp',parseInt)
-  .option('-l, --login <n>', 'Specify no of users who can login',parseInt)
+  // .option('-l, --login <n>', 'Specify no of users who can login',parseInt)
   .option('-t, --logintime <n>', 'To make users login at different time',parseInt)
   .option('-r, --repeat <n>', 'specify number of times user should chirp',parseInt)
+  .option('-s, --start <n>', 'specify the start index for login',parseInt)
+  .option('-e, --end <n>', 'specify the end index of login',parseInt)
   .parse(process.argv);
 
 program.canChirp   = typeof program.canChirp === 'undefined' ? 1 : program.canChirp;
-program.login      = typeof program.login === 'undefined' ? 1 : program.login;
+// program.login      = typeof program.login === 'undefined' ? 1 : program.login;
 program.logintime  = typeof program.logintime === 'undefined' ? 1000 : program.logintime;
 program.repeat     = typeof program.repeat === 'undefined' ? 1 : program.repeat;
+program.start      = typeof program.start === 'undefined' ? 0 : program.start;
+program.end        = typeof program.end === 'undefined' ? 29 : program.end;
 
 // Get the user logged in and make his/her presence public
 function loginUser(user, App){
@@ -27,9 +31,9 @@ function loginUser(user, App){
   return App
   .User().login(user.email,user.password)
   .then(function(loggeduser){
-      loggeduser.updateUserProfile({
+     /* loggeduser.updateUserProfile({
         username: loggeduser.get('email').split('@')[0]
-      })
+      })*/
       loggedinUser = loggeduser
       return App.User.getPresence()    
   })
@@ -210,8 +214,8 @@ function fetchUsers(App){
 
 if (cluster.isMaster) {
   // Fork workers.
-  var canLogin     = program.login;
-  for (var i = 0; i < canLogin; i++) {
+  /*var canLogin     = program.login;*/
+  for (var i = program.start; i <= program.end; i++) {
     setTimeout(function(){
       cluster.fork();
     },program.logintime*i);
@@ -220,19 +224,19 @@ if (cluster.isMaster) {
     //console.log('worker ' + worker.process.pid + ' died');
   });
 } else{
-    var userId       = cluster.worker.id - 1;
-    var chirpCount   = program.canChirp;    
-    var repeat       = program.repeat;
-    var App          = require('./sdk_localhost')
-                      .persistSessionWith('MEMORY')
-                       .enableRealtime();
-    var chirpCreateCount = 1
+    /*Userid to make specified users to login*/
+    var userId             = cluster.worker.id - 1 + program.start;
+    var chirpCount         = program.canChirp;    
+    var repeat             = program.repeat;
+    var chirpCreateCount   = 1
     var commentCreateCount = 1
-    //console.log("login called ",new Date());
-    //console.log("in if of can login");
+    var App                = require('./sdk_localhost').App
+                            .persistSessionWith('MEMORY')
+                            .enableRealtime();
+    console.log("userid ", userId);
+    
     loginUser(Users[userId], App)
     .then(function(user){
-      var chirpCount1 = 0
       console.log("logged in user",user.get('username'));
       App.Class('tweet').Object
       .on('create',function(chirp){
@@ -245,7 +249,6 @@ if (cluster.isMaster) {
         // for(var i=0;i<repeat;i++){
           console.log("in repeat after ", cluster.worker.id);
           var interval = setInterval(function(){
-            // console.log(cluster.worker.id, chirpCount1++)
             createChirp(user, App);
           }, program.logintime);
 
