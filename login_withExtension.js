@@ -218,7 +218,7 @@ if (cluster.isMaster) {
   for (var i = program.start; i <= program.end; i++) {
     setTimeout(function(){
       cluster.fork();
-    },program.logintime*i);
+    },program.logintime*(i-program.start));
   }
   cluster.on('exit', function(worker, code, signal) {
     //console.log('worker ' + worker.process.pid + ' died');
