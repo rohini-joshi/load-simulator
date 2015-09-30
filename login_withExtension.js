@@ -2,26 +2,22 @@ var cluster      = require('cluster');
 var when         = require('when');
 var sequence     = require('when/sequence');
 var program      = require('commander');
-
+var fs           = require('fs');
 var Users        = require('./users.json');
 var numUser      = Users.length;
 var workers      = [];
-
+var failedWorkers = []; 
 program
   .version('0.0.2')
   .usage('[options]')
   .option('-c, --canChirp <n>', 'Specify no of users who can post chirp',parseInt)
-  // .option('-l, --login <n>', 'Specify no of users who can login',parseInt)
   .option('-t, --logintime <n>', 'To make users login at different time',parseInt)
-  .option('-r, --repeat <n>', 'specify number of times user should chirp',parseInt)
   .option('-s, --start <n>', 'specify the start index for login',parseInt)
   .option('-e, --end <n>', 'specify the end index of login',parseInt)
   .parse(process.argv);
 
-program.canChirp   = typeof program.canChirp === 'undefined' ? 1 : program.canChirp;
-// program.login      = typeof program.login === 'undefined' ? 1 : program.login;
+program.canChirp   = typeof program.canChirp === 'undefined' ? 0 : program.canChirp;
 program.logintime  = typeof program.logintime === 'undefined' ? 1000 : program.logintime;
-program.repeat     = typeof program.repeat === 'undefined' ? 1 : program.repeat;
 program.start      = typeof program.start === 'undefined' ? 0 : program.start;
 program.end        = typeof program.end === 'undefined' ? 29 : program.end;
 
@@ -31,9 +27,6 @@ function loginUser(user, App){
   return App
   .User().login(user.email,user.password)
   .then(function(loggeduser){
-     /* loggeduser.updateUserProfile({
-        username: loggeduser.get('email').split('@')[0]
-      })*/
       loggedinUser = loggeduser
       return App.User.getPresence()    
   })
@@ -54,14 +47,13 @@ function loginUser(user, App){
     return loggedinUser;
   })
   .catch(function(err){
-    console.log("err in fetching", JSON.stringify(err,null,2));
+    console.log("err in fetching"+user.email, JSON.stringify(err,null,2));
     cluster.worker.kill()
   })
 }
 
 function createChirp(user, App){
   //to send chirps from dummy user after a random time interval
-  // console.log("in create chirp ",new Date());
   var requestBody = {
     content: "dummy chirp " + user.get('username') + new Date(),
     images: []
@@ -69,10 +61,6 @@ function createChirp(user, App){
   App.Extension.execute('createTweet',requestBody)
   .then(function(chirp){
     console.log("chirp created", cluster.worker.id, chirpCreateCount++);
-    /*if(Users[userId].canAct === 1){
-    sequence([comment], chirp, user, App);
-    }*/
-    //console.log("chirp created ",user.get('username'));
   },function(err){
     console.error("error in create tweet ",cluster.worker.id, JSON.stringify(err,null,2));
   })
@@ -80,7 +68,6 @@ function createChirp(user, App){
 
 function comment(chirp, user, App){
   //to comment on chirp after a random time interval
-  // console.log("in comment ",new Date());
   App.Extension.execute('addComment',{
     content: "dummy comment "+user.get('username')+" "+chirp.get('uid') + " " + new Date(),
     chirp_uid: chirp.get('uid')
@@ -100,7 +87,6 @@ function likeChirp(chirp,timeInt,user, App){
         chirp_uid: chirp.get('uid')
       })
       .then(function(tweet){
-        //console.log("chirp after unlike",user.get('uid'));
       })
     }else{
       App.Extension
@@ -108,7 +94,6 @@ function likeChirp(chirp,timeInt,user, App){
         chirp_uid: chirp.get('uid')
       })
       .then(function(tweet){
-        //console.log("chirp after like",user.get('uid'));
       })
     }
   },timeInt);
@@ -129,7 +114,6 @@ function getChirpsCount(user, App){
   .count()
   .exec()
   .then(function(){
-    //console.log("counts fetched");
   })
 }
 
@@ -151,7 +135,6 @@ function fetchChannels(user, App){
   .or([query1,query2])
   .exec()
   .then(function(){
-    //console.log("channels fetched");
   })
 }
 
@@ -171,10 +154,10 @@ function fetchChirps(user, App){
     .where('type', 'announcement');
 
   var queryChannel = App
-      .Class('channel')
-      .Query()
-      .includeOwner()
-      .select('type', queryChanneltype, 'uid');
+    .Class('channel')
+    .Query()
+    .includeOwner()
+    .select('type', queryChanneltype, 'uid');
 
   var announcement = App
     .Class('tweet')
@@ -196,7 +179,6 @@ function fetchChirps(user, App){
 
   return wallChirps.exec()
   .then(function(){
-    //console.log("chirps fetched");
   });
 }
 
@@ -208,20 +190,20 @@ function fetchUsers(App){
   .limit(500)
   .exec()
   .then(function(){
-    //console.log("users fetched");
   })
 }
 
 if (cluster.isMaster) {
   // Fork workers.
-  /*var canLogin     = program.login;*/
   for (var i = program.start; i <= program.end; i++) {
     setTimeout(function(){
       cluster.fork();
     },program.logintime*(i-program.start));
   }
   cluster.on('exit', function(worker, code, signal) {
-    //console.log('worker ' + worker.process.pid + ' died');
+    failedWorkers.push(worker.process.pid)
+    console.log('worker ' + worker.process.pid + ' died',failedWorkers.length);
+    fs.writeFileSync('errorStats.json', JSON.stringify({'failed': failedWorkers.length},'\t',2))
   });
 } else{
     /*Userid to make specified users to login*/
@@ -238,16 +220,14 @@ if (cluster.isMaster) {
     loginUser(Users[userId], App)
     .then(function(user){
       console.log("logged in user",user.get('username'));
+
       App.Class('tweet').Object
       .on('create',function(chirp){
-        if(Users[userId].canAct === 1  && cluster.worker.id <= chirpCount){
-          // console.log("into comment ");
+        if(cluster.worker.id <= chirpCount){
           sequence([comment], chirp, user, App);
         }
       });
       if(cluster.worker.id <= chirpCount){
-        // for(var i=0;i<repeat;i++){
-          console.log("in repeat after ", cluster.worker.id);
           var interval = setInterval(function(){
             createChirp(user, App);
           }, program.logintime);
@@ -257,7 +237,6 @@ if (cluster.isMaster) {
             clearInterval(interval)
           }, 31000)
 
-        // }
       }
 		})
 	}
