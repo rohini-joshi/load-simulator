@@ -1,18 +1,18 @@
 [
   {
+    "email": "dummyuserraw0@testraweng.com",
+    "password": "passdummy",
+    "password_confirm": "passdummy",
+    "extra_fields": {
+      "username": "dummyuserraw0"
+    }
+  },
+  {
     "email": "dummyuserraw1@testraweng.com",
     "password": "passdummy",
     "password_confirm": "passdummy",
     "extra_fields": {
       "username": "dummyuserraw1"
-    }
-  },
-  {
-    "email": "dummyuserraw3@testraweng.com",
-    "password": "passdummy",
-    "password_confirm": "passdummy",
-    "extra_fields": {
-      "username": "dummyuserraw3"
     }
   },
   {
@@ -32,11 +32,11 @@
     }
   },
   {
-    "email": "dummyuserraw0@testraweng.com",
+    "email": "dummyuserraw3@testraweng.com",
     "password": "passdummy",
     "password_confirm": "passdummy",
     "extra_fields": {
-      "username": "dummyuserraw0"
+      "username": "dummyuserraw3"
     }
   }
 ]

@@ -11,8 +11,8 @@ var RT_API_URL    = 'realtime-bltdev.cloudthis.com';
 /*var API_KEY       = 'bltcf8a6a24d6fe1a52';
 var API_URL       = 'stag-api.built.io'; 
 var RT_API_URL    = 'stag-realtime.built.io';  
-var masterKey     = 'blt123cd8608d77d061';*/
-
+var masterKey     = 'blt123cd8608d77d061';
+*/
 var APP_UID       = 'chirp';
 
 

@@ -8,6 +8,7 @@
     "ramda": "*",
     "rest": "*",
     "underscore": "^1.7.0",
-    "when": "*"
+    "when": "*",
+    "colors":"*"
   }
 }

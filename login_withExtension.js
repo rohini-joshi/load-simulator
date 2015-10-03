@@ -3,6 +3,7 @@ var when         = require('when');
 var sequence     = require('when/sequence');
 var program      = require('commander');
 var fs           = require('fs');
+var  colors      = require('colors')
 var Users        = require('./users.json');
 var numUser      = Users.length;
 var workers      = [];
@@ -47,7 +48,7 @@ function loginUser(user, App){
     return loggedinUser;
   })
   .catch(function(err){
-    console.log("err in fetching"+user.email, JSON.stringify(err,null,2));
+    console.log(colors.red("err in fetching"+user.email, JSON.stringify(err,null,2)));
     cluster.worker.kill()
   })
 }
@@ -182,15 +183,39 @@ function fetchChirps(user, App){
   });
 }
 
+// to fetch users in batches of 50 (pagination)
 function fetchUsers(App){
+  getUserCount(App)
+  .then(function(count){
+    var array = []
+    var limit = 50
+    var user_count = Math.ceil(count/limit)
+    for(var i=0;i<user_count;i++){
+      var skip = i*limit
+      array.push(skip)
+    }
+    var fnArray = array.map(function(skip){
+      return function(){
+        return App
+        .Class('built_io_application_user')
+        .Query()
+        .only(['username','uid','email','avatar.url','avatar_random','_presence','auth_data'])
+        .skip(skip)
+        .limit(limit)
+        .exec()
+      }
+    })
+    return sequence(fnArray)
+  })
+}
+
+//to get the count of total users before fetching them
+function getUserCount(App){
   return App
   .Class('built_io_application_user')
   .Query()
-  .only(['username','uid','email','avatar.url','avatar_random','_presence','follows','auth_data'])
-  .limit(500)
+  .count()
   .exec()
-  .then(function(){
-  })
 }
 
 if (cluster.isMaster) {
@@ -219,7 +244,7 @@ if (cluster.isMaster) {
     
     loginUser(Users[userId], App)
     .then(function(user){
-      console.log("logged in user",user.get('username'));
+      console.log(colors.green("logged in user",user.get('username')));
 
       App.Class('tweet').Object
       .on('create',function(chirp){
